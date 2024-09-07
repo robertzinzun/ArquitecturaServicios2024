@@ -1,6 +1,6 @@
 from fastapi import FastAPI,Depends
 import uvicorn
-from schemas import OpcionInsert, Salida, OpcionesSalida, OpcionSalida,Opcion
+from schemas import OpcionInsert, Salida, OpcionesSalida, OpcionSalida, Opcion, SolicitudInsert,SolicitudesSalida
 from database import get_db
 #from models import Opcion
 from sqlalchemy.orm import Session
@@ -41,6 +41,16 @@ def eliminarOpcion(id:int,db:Session=Depends(get_db))->Any:
     opcion=models.Opcion()
     return opcion.eliminar(id,db)
 
+@app.post('/solicitudes',tags=["Registrar Solicitud"],response_model=Salida)
+def agregarSolicitud(solicitudI:SolicitudInsert,db:Session=Depends(get_db))->Any:
+    solicitud=models.Solicitud(tema=solicitudI.tema,idOpcion=solicitudI.idOpcion,
+                               idAlumno=solicitudI.idAlumno)
+    return solicitud.registrar(db)
+
+@app.get('/solicitudes',tags=["Consultar Solicitudes"],response_model=SolicitudesSalida)
+def consultarSolicitudes(db:Session=Depends(get_db))->Any:
+    solicitud=models.Solicitud()
+    return solicitud.consultar(db)
 
 if __name__=="__main__":
     uvicorn.run("main:app", host="127.0.0.1", reload=True)

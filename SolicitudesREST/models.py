@@ -1,7 +1,8 @@
 from database import Base
-from sqlalchemy import Column,Integer,String
+from sqlalchemy import Column,Integer,String,text,Date
 from sqlalchemy.orm import Session
-from schemas import Salida, OpcionesSalida, OpcionSalida
+from schemas import Salida, OpcionesSalida, OpcionSalida,SolicitudesSalida
+import schemas
 
 
 
@@ -75,4 +76,70 @@ class Opcion(Base):
             salida.estatus="Error"
             salida.mensaje="Error al eliminar la opcion"
         return salida.dict()
+class Solicitud(Base):
+    __tablename__='vSolicitudes'
+    idSolicitud=Column(Integer,primary_key=True)
+    tema=Column(String(300),nullable=False)
+    idOpcion=Column(Integer)
+    idAlumno=Column(Integer)
+    noControl=Column(String(9))
+    Alumno=Column(String)
+    fechaRegistro=Column(Date)
+    fechaAtencion=Column(Date)
+    estatus=Column(String)
+    Opcion=Column(String)
+    idAdministrativo=Column(Integer)
+    Coordinador=Column(String)
+    idCarrera=Column(Integer)
+    Carrera=Column(String)
 
+    def registrar(self,db):
+        datos_entrada={"p_tema":self.tema,"p_idOpcion":self.idOpcion,"p_idAlumno":self.idAlumno}
+        db.execute(text('call sp_registrar_solicitud(:p_tema,:p_idOpcion,:p_idAlumno,@p_estatus,@p_mensaje)'),
+                   datos_entrada)
+        db.commit()
+        respuesta=db.execute(text('select @p_estatus,@p_mensaje')).fetchone()
+        salida=Salida()
+        salida.estatus=respuesta[0]
+        salida.mensaje=respuesta[1]
+        return salida.dict()
+    def consultar(self,db:Session):
+        salida=SolicitudesSalida()
+
+        lista=db.query(Solicitud).all()
+        listaSolicitudes=[]
+        for s in lista:
+            objSol=self.to_schema(s)
+            listaSolicitudes.append(objSol)
+        salida.solicitudes=listaSolicitudes
+        salida.estatus='OK'
+        salida.mensaje='Listado de Solicititudes'
+
+        return salida.dict()
+    def to_schema(self,objeto):
+        solicitud=schemas.SolicitudSelect()
+        administrativo=schemas.Administrativo()
+        administrativo.idAdministrativo=objeto.idAdministrativo
+        administrativo.nombre=objeto.Coordinador
+        solicitud.administrativo=administrativo
+        #solicitud.administrativo.nombre = objeto.Coordinador
+        alumno=schemas.Alumno()
+        alumno.idAlumno=objeto.idAlumno
+        alumno.nombre = objeto.Alumno
+        alumno.noControl = objeto.noControl
+        solicitud.alumno=alumno
+        carrera=schemas.Carrera()
+        carrera.idCarrera=objeto.idCarrera
+        carrera.nombre=objeto.Carrera
+        solicitud.carrera=carrera
+        opcion=schemas.OpcionSolicitud()
+        opcion.idOpcion=objeto.idOpcion
+        opcion.nombre=objeto.Opcion
+        solicitud.opcion=opcion
+        solicitud.estatus=objeto.estatus
+        solicitud.fechaAtencion=objeto.fechaAtencion
+        solicitud.fechaRegistro=objeto.fechaRegistro
+        solicitud.idSolicitud=objeto.idSolicitud
+        solicitud.tema=objeto.tema
+        return solicitud
+        
