@@ -52,7 +52,32 @@ class SolicitudSelect(BaseModel):
     idSolicitud:int|None=None
     opcion:OpcionSolicitud|None=None
     tema:str|None=None
-
-
 class SolicitudesSalida(Salida):
     solicitudes:List[SolicitudSelect]|None=[]
+class SolicitudSalida(Salida):
+    solicitud:SolicitudSelect|None=None
+class SolicitudUpdate(SolicitudInsert):
+    idSolicitud:int
+
+class SolicitudCE(BaseModel):
+    idSolicitud:int
+    idAlumno:int
+
+class SolicitudRevisar(BaseModel):
+    idSolicitud:int
+    idAdministrativo:int
+    estatus:str
+
+
+class Usuario(BaseModel):
+    idUsuario:int|None=None
+    nombre:str|None=None
+    email:str|None=None
+    password:str|None=None
+    estatus:str|None=None
+    telefono:str|None=None
+    tipo:str|None=None
+    sexo:str|None=None
+    id:int|None=None
+class UsuarioSalida(Salida):
+    usuario:Usuario|None=None

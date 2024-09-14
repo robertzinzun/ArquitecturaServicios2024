@@ -1,0 +1,40 @@
+{% extends 'comunes/base.html' %}
+{% block navbar %}
+    {% include 'comunes/menu.html' %}
+{% endblock %}
+{% block principal %}
+    <h1 class="bg bg-info">LISTADO DE SOLICITUDES</h1>
+    <!--if para preguntar el estatus de la respuesta-->
+    <a class="btn btn-primary" href="/solicitudes/nueva"> <span class="glyphicon glyphicon-plus"></span> Agregar </a>
+    <table class="table">
+        <thead>
+            <th>ID</th>
+            <th>PROYECTO</th>
+            <th>OPCION</th>
+            <th>ESTATUS</th>
+            <th>FECHA DE REGISTRO</th>
+            <th>FECHA DE ATENCION</th>
+            <th>Ver</th>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Crear una API REST</td>
+                <td>Informe de Residencias</td>
+                <td>Registro</td>
+                <td>09-09-2024</td>
+                <td>19-09-2024</td>
+                <td><a href="/solicitudes/editar/1"><span class="glyphicon glyphicon-eye-open"></span></a></td>
+            </tr>
+        </tbody>
+    </table>
+    <a href="/principal" class="btn btn-success"> <span class="glyphicon glyphicon-arrow-left"></span> Regresar </a>
+    {% if get_flashed_messages()%}
+            {% for m in get_flashed_messages()%}
+            <div class="alert alert-success alert-dismissible">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <strong>{{m}}</strong>
+            </div>
+            {% endfor %}
+    {% endif %}
+{% endblock %}
