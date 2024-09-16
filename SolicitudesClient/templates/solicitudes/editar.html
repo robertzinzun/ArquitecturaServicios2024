@@ -7,20 +7,20 @@
     <form action="/solicitudes/modificar" method="post">
         <div class="form-group">
             <label>ID:</label>
-            <input type="text" name="id" readonly value="1" class="form-control">
+            <input type="text" name="idSolicitud" value="{{solicitud['idSolicitud']}}" readonly class="form-control">
         </div>
 
         <div class="form-group">
             <label>Proyecto:</label>
-            <input type="text" name="proyecto" id="proyecto" class="form-control" required placeholder="Titulo del Proyecto" value="Desarrollo de una API">
+            <input type="text" name="tema" value="{{solicitud['tema']}}" class="form-control" required placeholder="Titulo del Proyecto">
         </div>
         <div class="form-group">
             <label>Opción:</label>
-            <select name="opcion">
+            <select name="idOpcion">
                 <option>-Elige una opción de titulación</option>
                 {% if opciones %}
                 {% for opcion in opciones %}
-                    {% if opcion['idOpcion']==solicitud['opcion'].get('id') %}
+                    {% if opcion['idOpcion']==solicitud['opcion'].get('idOpcion') %}
                         <option value="{{opcion['idOpcion']}}" selected>{{opcion['nombre']}}</option>
                     {% else %}
                         <option value="{{opcion['idOpcion']}}">{{opcion['nombre']}}</option>
@@ -30,13 +30,17 @@
             </select>
         </div>
         <div class="form-group">
-            <label>Estatus:Registro</label>
+            <label>Estatus:{{solicitud['estatus']}}</label>
         </div>
-        <button class="btn btn-primary" id="modificar"> <span class="glyphicon glyphicon-floppy-disk"></span> Guardar </button>
-        <a class="btn btn-success"> <span class="glyphicon glyphicon-send"></span> Enviar </a>
-        <a class="btn btn-danger" type="button" data-toggle="modal" data-target="#eliminar" > <span class="glyphicon glyphicon-trash"></span> Eliminar </a>
-        <a class="btn btn-info" type="button" data-toggle="modal" data-target="#eliminar" > <span class="glyphicon glyphicon-thumbs-up"></span> Autorizar </a>
-        <a class="btn btn-default" type="button" data-toggle="modal" data-target="#eliminar" > <span class="glyphicon glyphicon-thumbs-down"></span> Rechazar </a>
+        {% if session['usuario'].get('tipo')=='Alumno'and (solicitud['estatus']=='Registro' or solicitud['estatus']=='Rechazada')%}
+            <button class="btn btn-primary" id="modificar"> <span class="glyphicon glyphicon-floppy-disk"></span> Guardar </button>
+            <a class="btn btn-success" href="/solicitudes/enviar/{{solicitud['idSolicitud']}}"> <span class="glyphicon glyphicon-send"></span> Enviar </a>
+            <a class="btn btn-danger" type="button" data-toggle="modal" data-target="#eliminar" > <span class="glyphicon glyphicon-trash"></span> Eliminar </a>
+        {% endif %}
+        {% if session['usuario'].get('tipo')=='Administrativo' and solicitud['estatus']=='Revision' %}
+            <a class="btn btn-info" href="/solicitudes/autorizar/{{solicitud['idSolicitud']}}"> <span class="glyphicon glyphicon-thumbs-up"></span> Autorizar </a>
+            <a class="btn btn-default" href="/solicitudes/rechazar/{{solicitud['idSolicitud']}}" > <span class="glyphicon glyphicon-thumbs-down"></span> Rechazar </a>
+        {% endif %}
         <a class="btn btn-warning" href="/solicitudes"> <span class="glyphicon glyphicon-arrow-left"></span> Regresar </a>
         {% if get_flashed_messages()%}
             {% for m in get_flashed_messages()%}
@@ -58,10 +62,10 @@
             <h4 class="modal-title">Eliminar Solicitud</h4>
           </div>
           <div class="modal-body">
-            <p>¿ Estas seguro de eliminar la solicitud con ID: 1 ?</p>
+            <p>¿ Estas seguro de eliminar la solicitud con ID: {{solicitud['idSolicitud']}} ?</p>
           </div>
           <div class="modal-footer">
-              <a href="/solicitudes/eliminar/1" class="btn btn-info">Aceptar</a>
+              <a href="/solicitudes/cancelar/{{solicitud['idSolicitud']}}" class="btn btn-info">Aceptar</a>
               <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
           </div>
         </div>

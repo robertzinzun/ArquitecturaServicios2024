@@ -3,7 +3,7 @@ from sqlalchemy import Column,Integer,String,text,Date
 from sqlalchemy.orm import Session
 from schemas import Salida, OpcionesSalida, OpcionSalida,SolicitudesSalida,UsuarioSalida,Usuario
 import schemas
-
+from fastapi.encoders import jsonable_encoder
 
 
 class Opcion(Base):
@@ -124,9 +124,7 @@ class Solicitud(Base):
                          "p_tema": self.tema,
                          "p_idOpcion": self.idOpcion,
                          "p_idAlumno": self.idAlumno}
-        db.execute(text('call sp_modificar_solicitud(:p_idSolicitud,'
-                        ':p_tema,:p_idOpcion,:p_idAlumno,@p_estatus,@p_mensaje)'),
-                   datos_entrada)
+        db.execute(text('call sp_modificar_solicitud(:p_idSolicitud,:p_tema,:p_idOpcion,:p_idAlumno,@p_estatus,@p_mensaje)'),datos_entrada)
         db.commit()
         respuesta = db.execute(text('select @p_estatus,@p_mensaje')).fetchone()
         salida = Salida()
@@ -156,7 +154,7 @@ class Solicitud(Base):
         salida = Salida()
         salida.estatus = respuesta[0]
         salida.mensaje = respuesta[1]
-        return salida.dict()
+        return jsonable_encoder(salida)
     def revisar(self,db:Session):
         datos_entrada = {"p_idSolicitud":self.idSolicitud,
                          "p_idAdministrativo": self.idAdministrativo,
@@ -170,7 +168,7 @@ class Solicitud(Base):
         salida = Salida()
         salida.estatus = respuesta[0]
         salida.mensaje = respuesta[1]
-        return salida.dict()
+        return jsonable_encoder(salida)
     def to_schema(self,objeto):
         solicitud=schemas.SolicitudSelect()
         administrativo=schemas.Administrativo()
@@ -200,7 +198,7 @@ class Solicitud(Base):
     def consultarPorId(self,db:Session,id):
         salida= schemas.SolicitudSalida()
         try:
-            res=db.query(Solicitud).filter(Solicitud.idSolicitud==1).first()
+            res=db.query(Solicitud).filter(Solicitud.idSolicitud==id).first()
 
             if res:
                 solicitud=self.to_schema(res)
